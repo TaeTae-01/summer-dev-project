@@ -11,10 +11,10 @@ const validatePassword = (password) => {
 };
 
 const validateRegister = (req, res, next) => {
-  const { email, password, name } = req.body;
+  const { email, password, username } = req.body;
 
-  if (!email || !password || !name) {
-    return sendError(res, 'Email, password, and name are required', 400);
+  if (!email || !password || !username) {
+    return sendError(res, 'Email, password, and username are required', 400);
   }
 
   if (!validateEmail(email)) {
@@ -25,8 +25,8 @@ const validateRegister = (req, res, next) => {
     return sendError(res, 'Password must be at least 6 characters', 400);
   }
 
-  if (name.trim().length < 2) {
-    return sendError(res, 'Name must be at least 2 characters', 400);
+  if (username.trim().length < 2) {
+    return sendError(res, 'Username must be at least 2 characters', 400);
   }
 
   next();
