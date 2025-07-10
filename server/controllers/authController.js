@@ -1,8 +1,3 @@
-/**
- * 인증 관련 컨트롤러
- * 회원가입, 로그인, 사용자 정보 조회 등의 인증 로직을 처리
- */
-
 const User = require('../models/User');
 const { generateToken } = require('../config/auth');
 const { sendSuccess, sendError } = require('../utils/response');
@@ -14,21 +9,31 @@ const { sendSuccess, sendError } = require('../utils/response');
  */
 const register = async (req, res) => {
   try {
+    console.log('Register request received:', req.body);
     const { email, password, username } = req.body;
+    console.log('Extracted data:', { email, password: password ? '[PROVIDED]' : '[MISSING]', username });
 
     // 이미 존재하는 사용자 확인 (이메일 중복 체크)
+    console.log('Checking if user exists with email:', email);
     const existingUser = await User.findByEmail(email);
+    console.log('Existing user check result:', existingUser ? 'User exists' : 'User does not exist');
     if (existingUser) {
+      console.log('Registration failed: Email already exists');
       return sendError(res, 'Email already exists', 400);
     }
 
     // 새 사용자 생성 (비밀번호는 User 모델에서 자동으로 해싱됨)
+    console.log('Creating new user...');
     const user = await User.create({ email, password, username });
+    console.log('User created successfully:', { id: user.id, email: user.email, username: user.username });
     
     // JWT 토큰 생성
+    console.log('Generating JWT token...');
     const token = generateToken({ id: user.id, email: user.email });
+    console.log('Token generated successfully');
 
     // 성공 응답 (비밀번호 제외한 사용자 정보와 토큰 반환)
+    console.log('Sending success response');
     sendSuccess(res, {
       user: user.toJSON(),
       token
@@ -48,21 +53,27 @@ const register = async (req, res) => {
 const login = async (req, res) => {
   try {
     const { email, password } = req.body;
+    console.log('Input email: ', email);
+    console.log('Input password: ', password);
 
     // 이메일로 사용자 찾기
     const user = await User.findByEmail(email);
+    console.log('Find user: ', user);
     if (!user) {
       return sendError(res, 'Invalid email or password', 401);
     }
 
     // 비밀번호 확인 (bcrypt를 사용하여 해시된 비밀번호와 비교)
     const isValidPassword = await user.comparePassword(password);
+    console.log('Valid Password: ', isValidPassword);
+
     if (!isValidPassword) {
       return sendError(res, 'Invalid email or password', 401);
     }
 
     // JWT 토큰 생성
     const token = generateToken({ id: user.id, email: user.email });
+    console.log('token value: ', token);
 
     // 성공 응답 (사용자 정보와 토큰 반환)
     sendSuccess(res, {
@@ -70,6 +81,7 @@ const login = async (req, res) => {
       token
     }, 'Login successful');
 
+    console.log('Login successful');
   } catch (error) {
     console.error('Login error:', error);
     sendError(res, 'Login failed', 500);
