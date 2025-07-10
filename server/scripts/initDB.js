@@ -1,6 +1,4 @@
 // 데이터베이스 초기화 스크립트
-// 이 스크립트는 diggiding 데이터베이스를 생성하고 초기 데이터를 설정합니다.
-
 const { pool } = require('../config/database');
 const fs = require('fs');
 const path = require('path');
